@@ -60,8 +60,10 @@ const API_DEEPSEEK = 'https://api.deepseek.com/beta';
  * @param {import('../../prompt-converters.js').PromptNames} names Prompt names
  * @returns
  */
-function postProcessPrompt(messages, type, names) {
+function postProcessPrompt(messages, type, names, model="") {
     const addAssistantPrefix = x => x.length && (x[x.length - 1].role !== 'assistant' || (x[x.length - 1].prefix = true)) ? x : x;
+    var type = String(model).endsWith('-reasoner') ? 'deepseek-reasoner' : type;
+
     switch (type) {
         case 'merge':
         case 'claude':
@@ -929,7 +931,8 @@ router.post('/generate', jsonParser, function (request, response) {
             request.body.messages = postProcessPrompt(
                 request.body.messages,
                 request.body.custom_prompt_post_processing,
-                getPromptNames(request));
+                getPromptNames(request),
+                request.body.model);
         }
     } else if (request.body.chat_completion_source === CHAT_COMPLETION_SOURCES.PERPLEXITY) {
         apiUrl = API_PERPLEXITY;
